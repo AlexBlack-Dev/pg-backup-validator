@@ -1,0 +1,24 @@
+# Copy to validator.yaml and adjust. Env-vars (PGBV_*) override everything here.
+backup_dir: ./backups
+backup_patterns: ["*.dump", "*.custom", "*.sql", "*.sql.gz"]
+postgres_image: "postgres:16-alpine"
+postgres_user: validator
+postgres_password: validator_secret
+postgres_db: restore_check
+ready_timeout_sec: 60
+restore_timeout_sec: 600
+cleanup: true
+keep_container_on_failure: false
+expected_tables:
+  users: 1
+  orders: 0
+custom_checks:
+  - name: orders_have_users
+    sql: SELECT COUNT(*) FROM orders WHERE user_id NOT IN (SELECT id FROM users)
+    min_value: 0
+telegram_enabled: false
+telegram_token: ""
+telegram_chat_id: ""
+slack_enabled: false
+slack_webhook_url: ""
+report_dir: ./reports

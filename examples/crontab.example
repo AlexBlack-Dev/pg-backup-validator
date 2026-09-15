@@ -1,0 +1,2 @@
+# Every night at 03:30 — validate latest backup, keep JSON reports in ./reports
+30 3 * * * cd /opt/pg-backup-validator && PGBV_TELEGRAM_TOKEN=xxx PGBV_TELEGRAM_CHAT_ID=xxx /opt/pg-backup-validator/.venv/bin/pg-backup-validator -c validator.yaml validate >> /var/log/pgbv.log 2>&1

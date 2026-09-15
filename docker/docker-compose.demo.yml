@@ -1,0 +1,43 @@
+# Demo: source PG -> dump -> validator restores it into an ephemeral container.
+# 1. docker compose -f docker/docker-compose.demo.yml up -d
+# 2. seed + dump a backup into ./backups
+# 3. run validator against ./backups
+
+services:
+  source-db:
+    image: postgres:16-alpine
+    container_name: pgbv-demo-source
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo_secret
+      POSTGRES_DB: demo
+    ports:
+      - "55433:5432"
+    volumes:
+      - pgdemo:/var/lib/postgresql/data
+      - ../scripts/demo_seed.sql:/docker-entrypoint-initdb.d/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d demo"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+  validator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.validator
+    container_name: pgbv-demo-validator
+    depends_on:
+      source-db:
+        condition: service_healthy
+    environment:
+      PGBV_BACKUP_DIR: /backups
+      PGBV_POSTGRES_IMAGE: "postgres:16-alpine"
+      PGBV_REPORT_DIR: /reports
+    volumes:
+      - ../backups:/backups:ro
+      - ../reports:/reports
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../examples/validator.example.yaml:/config.yaml:ro
+    command: ["-c", "/config.yaml", "validate"]
+volumes:
+  pgdemo:
