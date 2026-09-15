@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+src/*.egg-info/
+reports/*.json
+reports/*.md
+!reports/.gitkeep
+backups/*.dump
+backups/*.sql
+backups/*.gz
+!backups/.gitkeep
+*.log
